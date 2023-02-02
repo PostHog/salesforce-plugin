@@ -86,7 +86,7 @@ export async function sendEventToSalesforce(
 
         global.logger.debug('processing event: ', event?.event)
 
-        const properties = getProperties(event, meta)
+        const properties = getProperties(event, config.propertiesToInclude)
 
         const response = await fetch(`${config.salesforceHost}/${config.eventPath}`, {
             method: config.eventMethodType,
