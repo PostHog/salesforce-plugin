@@ -67,7 +67,7 @@
             "key": "eventEndpointMapping",
             "name": "Event endpoint mapping",
             "type": "json",
-            "hint": "⚠️ For advanced uses only ⚠️ Allows you to map events to different SalesForce endpoints. See https://github.com/Vinovest/posthog-salesforce/blob/main/README.md for an example.",
+            "hint": "⚠️ For advanced uses only ⚠️ Allows you to map events to different SalesForce endpoints. See https://github.com/PostHog/salesforce-plugin/blob/main/README.md for an example.",
             "default": ""
         },
         {
