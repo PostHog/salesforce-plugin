@@ -72,7 +72,7 @@ async function sendEventToSalesforce(event: PluginEvent, meta: SalesforcePluginM
         global.logger.debug('processing event: ', event?.event)
 
         const token = await getToken(meta)
-        const properties = getProperties(event, meta)
+        const properties = getProperties(event, config.propertiesToInclude)
 
         const response = await fetch(`${config.salesforceHost}/${config.eventPath}`, {
             method: config.eventMethodType,
@@ -180,7 +180,7 @@ async function statusOk(res: Response, logger: Logger): Promise<boolean> {
     return String(res.status)[0] === '2'
 }
 
-function getProperties(event: PluginEvent, { config }: SalesforcePluginMeta): Properties {
+export function getProperties(event: PluginEvent, propertiesToInclude: string): Properties {
     // Spreading so the TypeScript compiler understands that in the
     // reducer there's no way the properties will be undefined
     const { properties } = event
@@ -189,14 +189,14 @@ function getProperties(event: PluginEvent, { config }: SalesforcePluginMeta): Pr
         return {}
     }
 
-    if (!config.propertiesToInclude?.trim()) {
+    if (!propertiesToInclude?.trim()) {
         return properties
     }
 
-    const allParameters = config.propertiesToInclude.split(',')
+    const allParameters = propertiesToInclude.split(',')
     const propertyKeys = Object.keys(properties)
 
-    const availableParameters = allParameters.reduce<Record<string, any>>((acc, currentValue) => {
+    return allParameters.reduce<Record<string, unknown>>((acc, currentValue) => {
         const trimmedKey = currentValue.trim()
 
         if (propertyKeys.includes(trimmedKey)) {
@@ -205,6 +205,4 @@ function getProperties(event: PluginEvent, { config }: SalesforcePluginMeta): Pr
 
         return acc
     }, {})
-
-    return availableParameters
 }
