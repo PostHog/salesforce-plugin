@@ -9,7 +9,7 @@
             "key": "salesforceHost",
             "name": "Salesforce Service Host",
             "type": "string",
-            "hint": "In the format of https://<org name>.my.salesforce.com",
+            "hint": "Usually in the format of https://<org name>.my.salesforce.com",
             "required": true
         },
         {

@@ -1,17 +1,17 @@
 {
     "name": "@vinovest/posthog-salesforce",
-    "displayName": "Hello World",
-    "version": "1.1.0",
+    "displayName": "Posthog Salesforce Plugin",
+    "version": "1.2.0",
     "keywords": [
         "posthog",
         "plugin"
     ],
     "main": "dist/index.js",
-    "repository": "github:Vinovest/posthog-salesforce",
+    "repository": "github:PostHog/posthog-salesforce",
     "bugs": {
-        "url": "https://github.com/Vinovest/posthog-salesforce/issues"
+        "url": "https://github.com/PostHog/posthog-salesforce/issues"
     },
-    "homepage": "https://github.com/Vinovest/posthog-salesforce#readme",
+    "homepage": "https://github.com/PostHog/posthog-salesforce#readme",
     "license": "MIT",
     "scripts": {
         "release": "./node_modules/.bin/standard-version --no-verify -a",

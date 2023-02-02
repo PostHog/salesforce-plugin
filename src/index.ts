@@ -1,6 +1,7 @@
-import { PluginMeta, PluginEvent, CacheExtension, RetryError, Properties } from '@posthog/plugin-scaffold'
+import { PluginMeta, PluginEvent, CacheExtension, RetryError, Properties, Plugin } from '@posthog/plugin-scaffold'
 import type { RequestInfo, RequestInit, Response } from 'node-fetch'
 import { createBuffer } from '@posthog/plugin-contrib'
+import { URL } from 'url'
 
 interface Logger {
     error: typeof console.error
@@ -25,33 +26,43 @@ declare function fetch(url: RequestInfo, init?: RequestInit): Promise<Response>
 
 const CACHE_TOKEN = 'SF_AUTH_TOKEN_'
 const CACHE_TTL = 60 * 60 * 5 // in seconds
-interface SalesforcePluginMeta extends PluginMeta {
+
+export interface SalesforcePluginConfig {
+    salesforceHost: string
+    eventPath: string
+    eventMethodType: string
+    username: string
+    password: string
+    consumerKey: string
+    consumerSecret: string
+    eventsToInclude: string
+    propertiesToInclude: string
+    debugLogging: string
+}
+
+type SalesForcePlugin = Plugin<{
     cache: CacheExtension
-    config: {
-        salesforceHost: string
-        eventPath: string
-        eventMethodType: string
-        username: string
-        password: string
-        consumerKey: string
-        consumerSecret: string
-        eventsToInclude: string
-        propertiesToInclude: string
-        debugLogging: string
-    }
+    config: SalesforcePluginConfig
     global: {
         buffer: ReturnType<typeof createBuffer>
         logger: Logger
     }
-}
+}>
 
-function verifyConfig({ config }: SalesforcePluginMeta) {
+export type SalesforcePluginMeta = PluginMeta<SalesForcePlugin>
+
+export function verifyConfig({ config }: SalesforcePluginMeta): void {
     if (!config.salesforceHost) {
         throw new Error('host not provided!')
     }
 
-    if (!/https:\/\/(.+).my.salesforce.com$/.test(config.salesforceHost)) {
-        throw new Error('Invalid salesforce host')
+    try {
+        new URL(config.salesforceHost)
+    } catch (error) {
+        throw new Error('host not a valid URL!')
+    }
+    if (!config.salesforceHost.startsWith('http')) {
+        throw new Error('host not a valid URL!')
     }
 
     if (!config.username) {
