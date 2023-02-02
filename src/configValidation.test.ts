@@ -12,8 +12,9 @@ describe('config validation', () => {
             password: '',
             consumerKey: '',
             consumerSecret: '',
-            eventsToInclude: '',
+            eventsToInclude: '$pageview',
             propertiesToInclude: '',
+            eventEndpointMapping: '',
             debugLogging: '',
         }
     })

@@ -1,7 +1,7 @@
 {
     "name": "@vinovest/posthog-salesforce",
     "displayName": "Posthog Salesforce Plugin",
-    "version": "1.2.0",
+    "version": "2.0.0",
     "keywords": [
         "posthog",
         "plugin"

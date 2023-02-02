@@ -13,18 +13,6 @@
             "required": true
         },
         {
-            "key": "eventPath",
-            "name": "Path of the url where events will go to. No leading forward slash",
-            "type": "string",
-            "required": true
-        },
-        {
-            "key": "eventMethodType",
-            "name": "The type of method for the event url",
-            "default": "POST",
-            "type": "string"
-        },
-        {
             "key": "username",
             "name": "Username",
             "type": "string",
@@ -58,10 +46,29 @@
             "hint": "Comma separated list of events to include. If not set, no events will be sent"
         },
         {
+            "key": "eventPath",
+            "name": "Path of the url where events will go to. No leading forward slash",
+            "type": "string",
+            "required": true
+        },
+        {
+            "key": "eventMethodType",
+            "name": "The type of method for the event url",
+            "default": "POST",
+            "type": "string"
+        },
+        {
             "key": "propertiesToInclude",
             "name": "Properties to include",
             "type": "string",
             "hint": "Comma separated list of properties to include. If not set, all properties of the event will be sent"
+        },
+        {
+            "key": "eventEndpointMapping",
+            "name": "Event endpoint mapping",
+            "type": "json",
+            "hint": "⚠️ For advanced uses only ⚠️ Allows you to map events to different SalesForce endpoints. See https://github.com/Vinovest/posthog-salesforce/blob/main/README.md for an example.",
+            "default": ""
         },
         {
             "key": "debugLogging",

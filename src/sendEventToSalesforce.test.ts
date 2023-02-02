@@ -38,4 +38,20 @@ describe('sendEventsToSalesforce', () => {
             method: 'POST',
         })
     })
+
+    it('can send an event to salesforce', async () => {
+        config = {
+            ...config,
+            eventsToInclude: '$pageview,checkout',
+            eventPath: 'test',
+        } as SalesforcePluginConfig
+
+        await sendEventToSalesforce(
+            ({ event: 'should not send', properties: { $current_url: 'https://home/io' } } as unknown) as PluginEvent,
+            ({ config, global } as unknown) as SalesforcePluginMeta,
+            'token'
+        )
+
+        expect(mockFetch).not.toHaveBeenCalled()
+    })
 })
