@@ -57,8 +57,9 @@ describe('event sink mapping', () => {
 
         it('can parse nonsense as an empty event sink mapping', () => {
             const config = ({ eventEndpointMapping: '🤘' } as unknown) as SalesforcePluginConfig
-            const mapping = parseEventSinkConfig(config)
-            expect(mapping).toEqual(null)
+            expect(() => parseEventSinkConfig(config)).toThrowError(
+                'eventEndpointMapping must be an empty string or contain valid JSON!'
+            )
         })
     })
 

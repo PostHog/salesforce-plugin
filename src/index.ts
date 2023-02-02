@@ -17,8 +17,7 @@ export const parseEventSinkConfig = (config: SalesforcePluginConfig): EventToSin
         try {
             eventMapping = JSON.parse(config.eventEndpointMapping) as EventToSinkMapping
         } catch (e) {
-            // TODO this should go into logs
-            // swallow exceptions parsing the event mapping
+            throw new Error('eventEndpointMapping must be an empty string or contain valid JSON!')
         }
     }
     return eventMapping
