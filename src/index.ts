@@ -76,13 +76,16 @@ export function verifyConfig({ config }: SalesforcePluginMeta): void {
     }
 }
 
-async function sendEventToSalesforce(event: PluginEvent, meta: SalesforcePluginMeta): Promise<void> {
+export async function sendEventToSalesforce(
+    event: PluginEvent,
+    meta: SalesforcePluginMeta,
+    token: string
+): Promise<void> {
     try {
         const { config, global } = meta
 
         global.logger.debug('processing event: ', event?.event)
 
-        const token = await getToken(meta)
         const properties = getProperties(event, meta)
 
         const response = await fetch(`${config.salesforceHost}/${config.eventPath}`, {
@@ -161,7 +164,7 @@ export async function setupPlugin(meta: SalesforcePluginMeta) {
         timeoutSeconds: 1,
         onFlush: async (events) => {
             for (const event of events) {
-                await sendEventToSalesforce(event, meta)
+                await sendEventToSalesforce(event, meta, await getToken(meta))
             }
         },
     })
