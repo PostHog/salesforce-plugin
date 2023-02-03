@@ -61,13 +61,15 @@ export interface SalesforcePluginConfig {
     eventEndpointMapping: string
 }
 
+export interface SalesforcePluginGlobal {
+    buffer: ReturnType<typeof createBuffer>
+    logger: Logger
+}
+
 type SalesForcePlugin = Plugin<{
     cache: CacheExtension
     config: SalesforcePluginConfig
-    global: {
-        buffer: ReturnType<typeof createBuffer>
-        logger: Logger
-    }
+    global: SalesforcePluginGlobal
 }>
 
 export type SalesforcePluginMeta = PluginMeta<SalesForcePlugin>
@@ -270,9 +272,23 @@ export async function setupPlugin(meta: SalesforcePluginMeta): Promise<void> {
     })
 }
 
-export async function onEvent(event: PluginEvent, { global }: SalesforcePluginMeta): Promise<void> {
+function configToMatchingEvents(config: SalesforcePluginConfig): string[] {
+    if (config.eventsToInclude) {
+        return config.eventsToInclude.split(',').map((e: string) => e.trim())
+    } else {
+        return Object.keys(JSON.parse(config.eventEndpointMapping)).map((e: string) => e.trim())
+    }
+    return []
+}
+
+export async function onEvent(event: PluginEvent, { global, config }: SalesforcePluginMeta): Promise<void> {
     if (!global.buffer) {
-        throw new Error(`there is no buffer. setup must have failed, cannot process event: ${event.event}`)
+        throw new Error(`There is no buffer. Setup must have failed, cannot process event: ${event.event}`)
+    }
+
+    const eventsToMatch = configToMatchingEvents(config)
+    if (!eventsToMatch.includes(event.event)) {
+        return
     }
 
     const eventSize = JSON.stringify(event).length
