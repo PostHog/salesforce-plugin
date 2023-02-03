@@ -90,6 +90,11 @@ const validateEventSinkConfig = (config: SalesforcePluginConfig): void => {
         if (!config.eventsToInclude) {
             throw new Error('If you are not providing an eventEndpointMapping then you must provide events to include.')
         }
+        if (!config.eventPath) {
+            throw new Error(
+                'If you are not providing an eventEndpointMapping then you must provide the salesforce path.'
+            )
+        }
     }
     // don't send v1 and v2 mapping
     if (eventMapping !== null && !!config.eventsToInclude?.trim()) {
@@ -223,7 +228,9 @@ async function generateAndSetToken({ config, cache, global }: SalesforcePluginMe
         formBody.push(encodedKey + '=' + encodedValue)
     }
 
-    const response = await fetch(`${config.salesforceHost}/services/oauth2/token`, {
+    const tokenURL = `${config.salesforceHost}/services/oauth2/token`
+    global.logger.debug('getting token from ', tokenURL)
+    const response = await fetch(tokenURL, {
         method: 'post',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formBody.join('&'),
@@ -263,15 +270,9 @@ export async function setupPlugin(meta: SalesforcePluginMeta): Promise<void> {
     })
 }
 
-export async function onEvent(event: PluginEvent, { global, config }: SalesforcePluginMeta): Promise<void> {
+export async function onEvent(event: PluginEvent, { global }: SalesforcePluginMeta): Promise<void> {
     if (!global.buffer) {
         throw new Error(`there is no buffer. setup must have failed, cannot process event: ${event.event}`)
-    }
-
-    const types = (config.eventsToInclude || '').split(',')
-
-    if (!types.includes(event.event) || !event.properties) {
-        return
     }
 
     const eventSize = JSON.stringify(event).length

@@ -5,13 +5,13 @@ describe('config validation', () => {
 
     beforeEach(() => {
         config = {
-            salesforceHost: '',
-            eventPath: '',
-            eventMethodType: '',
-            username: '',
-            password: '',
-            consumerKey: '',
-            consumerSecret: '',
+            salesforceHost: 'https://example.io',
+            eventPath: 'test',
+            eventMethodType: 'test',
+            username: 'test',
+            password: 'test',
+            consumerKey: 'test',
+            consumerSecret: 'test',
             eventsToInclude: '$pageview',
             propertiesToInclude: '',
             eventEndpointMapping: '',
@@ -32,5 +32,20 @@ describe('config validation', () => {
     it('rejects an FTP URL', () => {
         config.salesforceHost = 'ftp://bbc.co.uk'
         expect(() => verifyConfig({ config } as SalesforcePluginMeta)).toThrowError('host not a valid URL!')
+    })
+
+    it('allows empty eventPath when v2 mapping is present', () => {
+        config.eventsToInclude = ''
+        config.eventEndpointMapping = JSON.stringify({ pageview: { salesforcePath: '/test', method: 'POST' } })
+        expect(() => verifyConfig({ config } as SalesforcePluginMeta)).not.toThrowError()
+    })
+
+    it('requires eventPath when v2 mapping is not present', () => {
+        config.eventsToInclude = '$pageview'
+        config.eventPath = ''
+        config.eventEndpointMapping = ''
+        expect(() => verifyConfig({ config } as SalesforcePluginMeta)).toThrowError(
+            'If you are not providing an eventEndpointMapping then you must provide the salesforce path.'
+        )
     })
 })

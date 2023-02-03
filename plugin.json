@@ -48,8 +48,7 @@
         {
             "key": "eventPath",
             "name": "Path of the url where events will go to. No leading forward slash",
-            "type": "string",
-            "required": true
+            "type": "string"
         },
         {
             "key": "eventMethodType",
