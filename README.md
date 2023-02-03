@@ -56,14 +56,14 @@ For example:
 ```
 eventEndpointMapping: {
     "user signed up": {
-        salesforcePath: "Lead",
-        propertiesToInclude: "name,email,company"
-        method: "POST"
+        "salesforcePath": "Lead",
+        "propertiesToInclude": "name,email,company",
+        "method": "POST"
     }
     "insight analyzed": {
-        salesforcePath: "Engagement",
-        propertiesToInclude: "insight,user,duration"
-        method: "POST"
+        "salesforcePath": "Engagement",
+        "propertiesToInclude": "insight,user,duration",
+        "method": "POST"
     }
 }
 ```
