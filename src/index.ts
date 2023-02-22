@@ -151,7 +151,7 @@ const callSalesforce = async ({
 
     const isOk = await statusOk(response, logger)
     if (!isOk) {
-        throw new Error(`Not a 200 response from event hook ${response.status}. Response: ${response}`)
+        throw new Error(`Not a 200 response from event hook ${response.status}. Response: ${JSON.stringify(response)}`)
     }
 }
 
@@ -199,7 +199,12 @@ export async function sendEventToSalesforce(
             logger: global.logger,
         })
     } catch (error) {
-        meta.global.logger.error('error while sending event to salesforce. event: ', event, ' the error was ', error)
+        meta.global.logger.error(
+            'error while sending event to salesforce. event: ',
+            event.event,
+            ' the error was ',
+            error
+        )
         throw error
     }
 }
