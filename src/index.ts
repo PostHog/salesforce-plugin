@@ -1,6 +1,5 @@
 import { PluginMeta, PluginEvent, CacheExtension, RetryError, Properties, Plugin } from '@posthog/plugin-scaffold'
 import type { RequestInfo, RequestInit, Response } from 'node-fetch'
-import { createBuffer } from '@posthog/plugin-contrib'
 import { URL } from 'url'
 
 export interface EventSink {
@@ -62,7 +61,6 @@ export interface SalesforcePluginConfig {
 }
 
 export interface SalesforcePluginGlobal {
-    buffer: ReturnType<typeof createBuffer>
     logger: Logger
 }
 
@@ -265,16 +263,6 @@ export async function setupPlugin(meta: SalesforcePluginMeta): Promise<void> {
         global.logger.error('error in getToken', error)
         throw new RetryError('Failed to getToken. cache or salesforce is unavailable')
     }
-
-    global.buffer = createBuffer({
-        limit: 1024 * 1024, // 1 MB
-        timeoutSeconds: 1,
-        onFlush: async (events) => {
-            for (const event of events) {
-                await sendEventToSalesforce(event, meta, await getToken(meta))
-            }
-        },
-    })
 }
 
 function configToMatchingEvents(config: SalesforcePluginConfig): string[] {
@@ -286,22 +274,18 @@ function configToMatchingEvents(config: SalesforcePluginConfig): string[] {
     return []
 }
 
-export async function onEvent(event: PluginEvent, { global, config }: SalesforcePluginMeta): Promise<void> {
-    if (!global.buffer) {
-        throw new Error(`There is no buffer. Setup must have failed, cannot process event: ${event.event}`)
-    }
-
+export function shouldSendEvent(event: PluginEvent, meta: SalesforcePluginMeta): boolean {
+    const { config } = meta
     const eventsToMatch = configToMatchingEvents(config)
-    if (!eventsToMatch.includes(event.event)) {
+    return eventsToMatch.includes(event.event)
+}
+
+export async function onEvent(event: PluginEvent, meta: SalesforcePluginMeta): Promise<void> {
+    if (!shouldSendEvent(event, meta)) {
         return
     }
 
-    const eventSize = JSON.stringify(event).length
-    global.buffer.add(event, eventSize)
-}
-
-export function teardownPlugin({ global }: SalesforcePluginMeta): void {
-    global.buffer.flush()
+    await sendEventToSalesforce(event, meta, await getToken(meta))
 }
 
 async function statusOk(res: Response, logger: Logger): Promise<boolean> {
