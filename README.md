@@ -74,4 +74,4 @@ V1 and V2 config cannot be set at the same time.
 
 ## Questions?
 
-### [Join the PostHog Users Slack community.](https://posthog.com/slack)
+### [Join the PostHog community.](https://posthog.com/questions)
