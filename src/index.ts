@@ -6,7 +6,11 @@ export interface EventSink {
     salesforcePath: string
     propertiesToInclude: string
     method: string
+    fieldMappings: FieldMappings
+
 }
+
+export type FieldMappings = Record<string, string>;
 
 export type EventToSinkMapping = Record<string, EventSink>
 
@@ -144,7 +148,7 @@ const callSalesforce = async ({
     const response = await fetch(`${host}/${sink.salesforcePath}`, {
         method: sink.method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(getProperties(event, sink.propertiesToInclude)),
+        body: JSON.stringify(getProperties(event, sink.propertiesToInclude, sink.fieldMappings)),
     })
 
     const isOk = await statusOk(response, logger)
@@ -185,6 +189,8 @@ export async function sendEventToSalesforce(
                 salesforcePath: config.eventPath,
                 method: config.eventMethodType,
                 propertiesToInclude: config.propertiesToInclude,
+                fieldMappings: {}
+                
             }
             global.logger.debug('v1: processing event: ', event?.event, ' with sink ', eventSink)
         }
@@ -293,7 +299,11 @@ async function statusOk(res: Response, logger: Logger): Promise<boolean> {
     return String(res.status)[0] === '2'
 }
 
-export function getProperties(event: PluginEvent, propertiesToInclude: string): Properties {
+function getNestedProperty(obj: any, path: string): any {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}
+
+export function getProperties(event: PluginEvent, propertiesToInclude: string, fieldMappings: FieldMappings = {}): Properties {
     // Spreading so the TypeScript compiler understands that in the
     // reducer there's no way the properties will be undefined
     const { properties } = event
@@ -311,8 +321,14 @@ export function getProperties(event: PluginEvent, propertiesToInclude: string): 
 
     return allParameters.reduce<Record<string, unknown>>((acc, currentValue) => {
         const trimmedKey = currentValue.trim()
+        const mappedKey = fieldMappings[trimmedKey] || trimmedKey;
 
-        if (propertyKeys.includes(trimmedKey)) {
+        if (mappedKey.includes('.')) {
+            const value = getNestedProperty(properties, mappedKey);
+            if (value !== undefined) {
+                acc[trimmedKey] = value;
+            }
+        } else if (propertyKeys.includes(trimmedKey)) {
             acc[trimmedKey] = properties[trimmedKey]
         }
 
