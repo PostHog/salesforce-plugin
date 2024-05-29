@@ -299,7 +299,7 @@ async function statusOk(res: Response, logger: Logger): Promise<boolean> {
     return String(res.status)[0] === '2'
 }
 
-function getNestedProperty(obj: any, path: string): any {
+function getNestedProperty(obj: Record<string, unknown>, path: string): any {
     return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 }
 
