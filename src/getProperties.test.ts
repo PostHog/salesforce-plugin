@@ -47,6 +47,24 @@ describe('filtering by property allow list', () => {
             })
         })
 
+        it('can handle deeply nested properties', () => {
+            const properties = { name: 'a@b.com', person_properties: {middle: {bottom:'val'}, surname: 'Smith'} }
+            const filteredProperties = getProperties(
+                ({ properties } as unknown) as PluginEvent,
+                'person_properties.middle.bottom,name',
+                {
+                    name: 'Name',
+                    'person_properties.surname': 'LastName',
+                    'person_properties.middle.bottom': 'MiddleBottom'
+                }
+            )
+
+            expect(filteredProperties).toEqual({
+                Name: 'a@b.com',
+                MiddleBottom: 'val'
+            })
+        })
+
         it('maps fields when there are no properties to include provided', () => {
             const properties = { name: 'a@b.com', another: 'value' }
             const filteredProperties = getProperties(

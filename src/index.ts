@@ -300,14 +300,13 @@ async function statusOk(res: Response, logger: Logger): Promise<boolean> {
     return String(res.status)[0] === '2'
 }
 
-// just to get going!
+// we allow `any` since we don't know what type the properties are, and `unknown` is too restrictive here
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getNestedProperty(properties: Record<string, any>, path: string): any {
-    return path.split('.').reduce((acc, part) => acc && acc[part], properties);
+    return path.split('.').reduce((acc, part) => acc[part], properties);
 }
 
 export function getProperties(event: PluginEvent, propertiesToInclude: string, fieldMappings: FieldMappings = {}): Properties {
-    // Spreading so the TypeScript compiler understands that in the
-    // reducer there's no way the properties will be undefined
     const { properties } = event
 
     if (!properties) {
