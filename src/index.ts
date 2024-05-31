@@ -301,7 +301,7 @@ async function statusOk(res: Response, logger: Logger): Promise<boolean> {
 }
 
 // just to get going!
-function getNestedProperty(obj: any, path: string): any {
+function getNestedProperty(obj: Record<string, any>, path: string): any {
     return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 }
 
@@ -314,6 +314,8 @@ export function getProperties(event: PluginEvent, propertiesToInclude: string, f
         return {}
     }
 
+    // TODO not sending properties to include short-circuits to returning all properties
+    // TODO but skips applying mapping... when I guess we should apply mapping
     if (!propertiesToInclude?.trim()) {
         return properties
     }
@@ -331,7 +333,7 @@ export function getProperties(event: PluginEvent, propertiesToInclude: string, f
                 acc[trimmedKey] = value;
             }
         } else if (propertyKeys.includes(trimmedKey)) {
-            acc[trimmedKey] = properties[trimmedKey]
+            acc[mappedKey] = properties[trimmedKey]
         }
 
         return acc

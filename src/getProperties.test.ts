@@ -20,5 +20,26 @@ describe('filtering by property allow list', () => {
             const filteredProperties = getProperties(({ properties } as unknown) as PluginEvent, 'a,   c')
             expect(filteredProperties).toEqual({ a: 'a', c: 'c' })
         })
+
+        it('converts properties using field mappings', () => {
+            const properties = { email: 'a', b: 'b', surname: 'c', d: 'e' }
+            const filteredProperties = getProperties(
+                ({ properties } as unknown) as PluginEvent, 'email,surname,d',
+                { email: 'Email', surname: 'LastName' }
+            )
+            expect(filteredProperties).toEqual({ Email: 'a', LastName: 'c', d: 'e' })
+        })
+
+        it('can handle nested properties', () => {
+            const properties = { email: 'a', top: {middle: {bottom:'val'}} }
+            const filteredProperties = getProperties(
+                ({ properties } as unknown) as PluginEvent,
+                'top',
+                {  } // TODO how do field mappings and nested properties interact
+            )
+
+            // TODO - I don't actually understand what nested properties are, could do with an example here 🙈
+            expect(filteredProperties).toEqual('wat')
+        })
     })
 })
