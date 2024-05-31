@@ -6,8 +6,9 @@ export interface EventSink {
     salesforcePath: string
     propertiesToInclude: string
     method: string
-    fieldMappings: FieldMappings
-
+    // NOTE: originally fieldMappings was not included, it should always be included now,
+    // but is optional for backwards compatibility
+    fieldMappings?: FieldMappings
 }
 
 export type FieldMappings = Record<string, string>;
@@ -190,7 +191,7 @@ export async function sendEventToSalesforce(
                 method: config.eventMethodType,
                 propertiesToInclude: config.propertiesToInclude,
                 fieldMappings: {}
-                
+
             }
             global.logger.debug('v1: processing event: ', event?.event, ' with sink ', eventSink)
         }
@@ -299,7 +300,8 @@ async function statusOk(res: Response, logger: Logger): Promise<boolean> {
     return String(res.status)[0] === '2'
 }
 
-function getNestedProperty(obj: Record<string, unknown>, path: string): any {
+// just to get going!
+function getNestedProperty(obj: any, path: string): any {
     return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 }
 
