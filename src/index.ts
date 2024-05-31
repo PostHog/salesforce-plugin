@@ -301,8 +301,8 @@ async function statusOk(res: Response, logger: Logger): Promise<boolean> {
 }
 
 // just to get going!
-function getNestedProperty(obj: Record<string, any>, path: string): any {
-    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+function getNestedProperty(properties: Record<string, any>, path: string): any {
+    return path.split('.').reduce((acc, part) => acc && acc[part], properties);
 }
 
 export function getProperties(event: PluginEvent, propertiesToInclude: string, fieldMappings: FieldMappings = {}): Properties {
@@ -314,28 +314,16 @@ export function getProperties(event: PluginEvent, propertiesToInclude: string, f
         return {}
     }
 
-    // TODO not sending properties to include short-circuits to returning all properties
-    // TODO but skips applying mapping... when I guess we should apply mapping
-    if (!propertiesToInclude?.trim()) {
-        return properties
-    }
+    // if no propertiesToInclude is set then all properties are allowed
+    const propertiesAllowList = !!propertiesToInclude?.trim().length ? propertiesToInclude.split(',').map((e) => e.trim()) : Object.keys(properties)
 
-    const allParameters = propertiesToInclude.split(',')
-    const propertyKeys = Object.keys(properties)
+    const mappedProperties: Record<string, any> = {}
 
-    return allParameters.reduce<Record<string, unknown>>((acc, currentValue) => {
-        const trimmedKey = currentValue.trim()
-        const mappedKey = fieldMappings[trimmedKey] || trimmedKey;
+    propertiesAllowList.forEach((allowedProperty) => {
+        const val = getNestedProperty(properties, allowedProperty)
+        const mappedKey = fieldMappings[allowedProperty] || allowedProperty
+        mappedProperties[mappedKey] = val
+    })
 
-        if (mappedKey.includes('.')) {
-            const value = getNestedProperty(properties, mappedKey);
-            if (value !== undefined) {
-                acc[trimmedKey] = value;
-            }
-        } else if (propertyKeys.includes(trimmedKey)) {
-            acc[mappedKey] = properties[trimmedKey]
-        }
-
-        return acc
-    }, {})
+    return mappedProperties
 }

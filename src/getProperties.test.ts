@@ -31,15 +31,38 @@ describe('filtering by property allow list', () => {
         })
 
         it('can handle nested properties', () => {
-            const properties = { email: 'a', top: {middle: {bottom:'val'}} }
+            const properties = { name: 'a@b.com', person_properties: {middle: {bottom:'val'}, surname: 'Smith'} }
             const filteredProperties = getProperties(
                 ({ properties } as unknown) as PluginEvent,
-                'top',
-                {  } // TODO how do field mappings and nested properties interact
+                'person_properties.surname,name',
+                {
+                    name: 'Name',
+                    'person_properties.surname': 'LastName',
+                }
             )
 
-            // TODO - I don't actually understand what nested properties are, could do with an example here 🙈
-            expect(filteredProperties).toEqual('wat')
+            expect(filteredProperties).toEqual({
+                Name: 'a@b.com',
+                LastName: 'Smith'
+            })
+        })
+
+        it('maps fields when there are no properties to include provided', () => {
+            const properties = { name: 'a@b.com', another: 'value' }
+            const filteredProperties = getProperties(
+                ({ properties } as unknown) as PluginEvent,
+                '     ',
+                {
+                    name: 'Name',
+                    // redundant mapping is safely ignored
+                    'person_properties.surname': 'LastName',
+                }
+            )
+
+            expect(filteredProperties).toEqual({
+                Name: 'a@b.com',
+                another: 'value'
+            })
         })
     })
 })
