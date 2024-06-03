@@ -71,7 +71,7 @@ eventEndpointMapping: {
         "propertiesToInclude": "insight,user,duration",
         "method": "POST"
         // No fieldMappings, so the property names will be used as the field names
-        // when fieldMappings are not provided the property names in PostHog will be useed
+        // when fieldMappings are not provided the property names in PostHog will be used
         // these must exactly match the fields expected by SalesForce
     }
 }
