@@ -70,6 +70,13 @@
             "default": ""
         },
         {
+            "key": "fieldMappings",
+            "name": "Event to salesforce field mapping",
+            "type": "json",
+            "hint": "SalesForce can be strict about field names, if your posthog event property names don't match then you can map them using this. See https://github.com/PostHog/salesforce-plugin/blob/main/README.md for an example.",
+            "default": ""
+        },
+        {
             "key": "debugLogging",
             "name": "Enable debug logging",
             "type": "choice",

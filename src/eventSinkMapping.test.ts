@@ -58,7 +58,7 @@ describe('event sink mapping', () => {
         it('can parse nonsense as an empty event sink mapping', () => {
             const config = ({ eventEndpointMapping: '🤘' } as unknown) as SalesforcePluginConfig
             expect(() => parseEventSinkConfig(config)).toThrowError(
-                'eventEndpointMapping must be an empty string or contain valid JSON!'
+                'eventEndpointMapping must be an empty string or contain valid JSON!',
             )
         })
     })
@@ -127,7 +127,12 @@ describe('event sink mapping', () => {
     })
 
     describe('sending to sink', () => {
-        const global = ({ logger: { debug: jest.fn(), error: jest.fn() } } as unknown) as SalesforcePluginMeta['global']
+        const global = ({
+            logger: {
+                debug: jest.fn(),
+                error: jest.fn(),
+            },
+        } as unknown) as SalesforcePluginMeta['global']
         const config = {
             salesforceHost: 'https://example.io',
             eventMethodType: 'POST',
@@ -150,7 +155,7 @@ describe('event sink mapping', () => {
             await sendEventToSalesforce(
                 { event: 'uninteresting' } as PluginEvent,
                 ({ config, global } as unknown) as SalesforcePluginMeta,
-                'token'
+                'token',
             )
             expect(mockFetch).not.toHaveBeenCalled()
         })
@@ -166,7 +171,7 @@ describe('event sink mapping', () => {
                     config: config,
                     cache: undefined,
                 } as unknown) as SalesforcePluginMeta,
-                'the bearer token'
+                'the bearer token',
             )
             expect(mockFetch).toHaveBeenCalledWith('https://example.io/something', {
                 body: '{"two":"includes"}',

@@ -6,7 +6,12 @@ export interface EventSink {
     salesforcePath: string
     propertiesToInclude: string
     method: string
+    // NOTE: originally fieldMappings was not included, it should always be included now,
+    // but is optional for backwards compatibility
+    fieldMappings?: FieldMappings
 }
+
+export type FieldMappings = Record<string, string>;
 
 export type EventToSinkMapping = Record<string, EventSink>
 
@@ -144,7 +149,7 @@ const callSalesforce = async ({
     const response = await fetch(`${host}/${sink.salesforcePath}`, {
         method: sink.method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(getProperties(event, sink.propertiesToInclude)),
+        body: JSON.stringify(getProperties(event, sink.propertiesToInclude, sink.fieldMappings)),
     })
 
     const isOk = await statusOk(response, logger)
@@ -185,6 +190,8 @@ export async function sendEventToSalesforce(
                 salesforcePath: config.eventPath,
                 method: config.eventMethodType,
                 propertiesToInclude: config.propertiesToInclude,
+                fieldMappings: {}
+
             }
             global.logger.debug('v1: processing event: ', event?.event, ' with sink ', eventSink)
         }
@@ -293,29 +300,29 @@ async function statusOk(res: Response, logger: Logger): Promise<boolean> {
     return String(res.status)[0] === '2'
 }
 
-export function getProperties(event: PluginEvent, propertiesToInclude: string): Properties {
-    // Spreading so the TypeScript compiler understands that in the
-    // reducer there's no way the properties will be undefined
+// we allow `any` since we don't know what type the properties are, and `unknown` is too restrictive here
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getNestedProperty(properties: Record<string, any>, path: string): any {
+    return path.split('.').reduce((acc, part) => acc[part], properties);
+}
+
+export function getProperties(event: PluginEvent, propertiesToInclude: string, fieldMappings: FieldMappings = {}): Properties {
     const { properties } = event
 
     if (!properties) {
         return {}
     }
 
-    if (!propertiesToInclude?.trim()) {
-        return properties
-    }
+    // if no propertiesToInclude is set then all properties are allowed
+    const propertiesAllowList = !!propertiesToInclude?.trim().length ? propertiesToInclude.split(',').map((e) => e.trim()) : Object.keys(properties)
 
-    const allParameters = propertiesToInclude.split(',')
-    const propertyKeys = Object.keys(properties)
+    const mappedProperties: Record<string, any> = {}
 
-    return allParameters.reduce<Record<string, unknown>>((acc, currentValue) => {
-        const trimmedKey = currentValue.trim()
+    propertiesAllowList.forEach((allowedProperty) => {
+        const val = getNestedProperty(properties, allowedProperty)
+        const mappedKey = fieldMappings[allowedProperty] || allowedProperty
+        mappedProperties[mappedKey] = val
+    })
 
-        if (propertyKeys.includes(trimmedKey)) {
-            acc[trimmedKey] = properties[trimmedKey]
-        }
-
-        return acc
-    }, {})
+    return mappedProperties
 }

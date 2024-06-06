@@ -59,11 +59,20 @@ eventEndpointMapping: {
         "salesforcePath": "Lead",
         "propertiesToInclude": "name,email,company",
         "method": "POST"
+        // SalesForce can be very strict about what fields it accepts
+        // you can provide a mapping of PostHog properties to SalesForce fields
+        "fieldMappings": {
+            email: "Email",
+            name: "FullName", 
+        }
     }
     "insight analyzed": {
         "salesforcePath": "Engagement",
         "propertiesToInclude": "insight,user,duration",
         "method": "POST"
+        // No fieldMappings, so the property names will be used as the field names
+        // when fieldMappings are not provided the property names in PostHog will be used
+        // these must exactly match the fields expected by SalesForce
     }
 }
 ```
